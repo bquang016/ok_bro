@@ -1,0 +1,23 @@
+# Bỏ qua các file và thư mục của Maven
+target/
+pom.xml.tag
+pom.xml.versionsBackup
+pom.xml.releaseBackup
+
+# Bỏ qua các file cấu hình của IDE
+.idea/
+*.iml
+*.iws
+
+# Bỏ qua các file log và file tạm
+*.log
+.settings/
+.classpath
+.project
+
+# Quan trọng: Bỏ qua thư mục chứa các file người dùng tải lên
+src/main/resources/static/uploads/
+
+# Bỏ qua các file của Git
+.git
+.gitignore
