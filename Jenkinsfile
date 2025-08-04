@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Cập nhật username Docker Hub của bạn
+        // Cập nhật username Docker Hub của bạnnn
         DOCKERHUB_USERNAME = 'quangtb7'
         // ID của credential cho Docker Hub trong Jenkins
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
