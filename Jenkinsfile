@@ -6,9 +6,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
         DB_PASSWORD_CREDENTIALS_ID = 'mysql-root-password'
         APP_NAME = 'art-gallery-app'
-        // *** THÊM MỚI: Chỉ định đường dẫn đến thư mục bin của Docker ***
-        // Lưu ý: Dùng dấu gạch chéo kép "\\" cho đường dẫn trong Windows
-        DOCKER_PATH = 'C:\\Program Files\\Docker\\Docker\\resources\\bin'
+        // *** THAY ĐỔI QUAN TRỌNG: Thêm thư mục bin của Docker vào biến PATH ***
+        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
     }
 
     stages {
@@ -29,9 +28,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'Bắt đầu build Docker image...'
-                // *** THAY ĐỔI: Thêm đường dẫn đầy đủ vào lệnh docker ***
-                bat "\"${env.DOCKER_PATH}\\docker\" build -t ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ."
-                bat "\"${env.DOCKER_PATH}\\docker\" tag ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
+                // Giờ đây có thể gọi lệnh trực tiếp
+                bat "docker build -t ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ."
+                bat "docker tag ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
             }
         }
 
@@ -39,11 +38,10 @@ pipeline {
             steps {
                 echo 'Đẩy image lên Docker Hub...'
                 withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    // *** THAY ĐỔI: Thêm đường dẫn đầy đủ vào lệnh docker ***
-                    bat "\"${env.DOCKER_PATH}\\docker\" logout"
-                    bat "\"${env.DOCKER_PATH}\\docker\" login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
-                    bat "\"${env.DOCKER_PATH}\\docker\" push ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER}"
-                    bat "\"${env.DOCKER_PATH}\\docker\" push ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
+                    bat "docker logout"
+                    bat "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
+                    bat "docker push ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER}"
+                    bat "docker push ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
                 }
             }
         }
@@ -52,9 +50,9 @@ pipeline {
             steps {
                 echo 'Triển khai ứng dụng bằng Docker Compose...'
                 withCredentials([string(credentialsId: DB_PASSWORD_CREDENTIALS_ID, variable: 'DB_PASSWORD')]) {
-                    // *** THAY ĐỔI: Thêm đường dẫn đầy đủ vào lệnh docker-compose ***
-                    bat "\"${env.DOCKER_PATH}\\docker-compose\" down || true"
-                    bat "\"${env.DOCKER_PATH}\\docker-compose\" up -d"
+                    // Thay thế "|| true" bằng một lệnh bat hợp lệ hơn để bỏ qua lỗi
+                    bat "docker-compose down || echo No containers to stop, continuing..."
+                    bat "docker-compose up -d"
                 }
             }
         }
@@ -63,8 +61,7 @@ pipeline {
     post {
         always {
             echo 'Quy trình hoàn tất.'
-            // *** THAY ĐỔI: Thêm đường dẫn đầy đủ vào lệnh docker ***
-            bat "\"${env.DOCKER_PATH}\\docker\" logout"
+            bat "docker logout"
         }
     }
 }
