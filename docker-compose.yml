@@ -4,18 +4,18 @@ services:
   # Service cho ứng dụng Spring Boot
   art-gallery-app:
     build: .
-    image: quangtb7/art-gallery-app # <-- Cập nhật username Docker Hub
+    image: quangtb7/art-gallery-app
     restart: unless-stopped
     ports:
       - "8085:8085"
     depends_on:
       - db
     environment:
-      # Thay đổi cổng kết nối tới database thành 3306 (cổng nội bộ của container db)
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/art_gal_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
       - SPRING_DATASOURCE_USERNAME=root
-      # Mật khẩu sẽ được truyền vào từ Jenkins
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      # Thêm cấu hình để Actuator hoạt động trên cổng chính
+      - management.server.port=8085
 
   # Service cho cơ sở dữ liệu MySQL
   db:
@@ -23,16 +23,36 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: art_gal_db
-      MYSQL_USER: root
-      # Mật khẩu sẽ được truyền vào từ Jenkins
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      # Ánh xạ cổng 3306 nội bộ của container ra cổng 3307 bên ngoài
-      # Bạn có thể thay 3307 bằng bất kỳ cổng nào còn trống trên máy của bạn
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
 
+  # === THÊM MỚI: Service cho Prometheus ===
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090" # Cổng để truy cập giao diện Prometheus
+    volumes:
+      # Map file cấu hình prometheus.yml vào trong container
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  # === THÊM MỚI: Service cho Grafana ===
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # Cổng để truy cập giao diện Grafana
+    volumes:
+      - grafana_data:/var/lib/grafana # Lưu trữ dữ liệu dashboard của Grafana
+    depends_on:
+      - prometheus
+
 volumes:
   db_data:
+  grafana_data: # Thêm volume cho Grafana
