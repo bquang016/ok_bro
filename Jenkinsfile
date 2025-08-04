@@ -22,7 +22,7 @@ pipeline {
         stage('Build Application') {
             steps {
                 echo 'Bắt đầu build ứng dụng Spring Boot...'
-                // Sử dụng 'bat' và cú pháp của Windows
+                // Sử dụng 'bat' và cú pháp của Windowss
                 // Thay thế `docker run` bằng `mvn` trực tiếp nếu Maven được cài đặt trên máy Jenkins
                 // Hoặc đảm bảo Docker Desktop đang chạy và có thể thực thi lệnh docker
                 bat 'mvnw.cmd clean package -DskipTests'
