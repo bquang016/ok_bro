@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Cập nhật username Docker Hub của bạnnn
+        // Cập nhật username Docker Hub của bạn
         DOCKERHUB_USERNAME = 'quangtb7'
         // ID của credential cho Docker Hub trong Jenkins
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
@@ -22,25 +22,31 @@ pipeline {
         stage('Build Application') {
             steps {
                 echo 'Bắt đầu build ứng dụng Spring Boot...'
-                sh 'docker run -v $WORKSPACE:/app -w /app --rm maven:3.9.6-eclipse-temurin-21 mvn clean package -DskipTests'
+                // Sử dụng 'bat' và cú pháp của Windows
+                // Thay thế `docker run` bằng `mvn` trực tiếp nếu Maven được cài đặt trên máy Jenkins
+                // Hoặc đảm bảo Docker Desktop đang chạy và có thể thực thi lệnh docker
+                bat 'mvnw.cmd clean package -DskipTests'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 echo 'Bắt đầu build Docker image...'
-                sh "docker build -t ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ."
-                sh "docker tag ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
+                // Sử dụng 'bat' cho các lệnh docker
+                bat "docker build -t ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ."
+                bat "docker tag ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER} ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
                 echo 'Đẩy image lên Docker Hub...'
+                // Khối withCredentials vẫn giữ nguyên
                 withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
-                    sh "docker push ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker push ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
+                    // Sử dụng 'bat' và `set /p` để truyền password một cách an toàn
+                    bat "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
+                    bat "docker push ${DOCKERHUB_USERNAME}/${APP_NAME}:${env.BUILD_NUMBER}"
+                    bat "docker push ${DOCKERHUB_USERNAME}/${APP_NAME}:latest"
                 }
             }
         }
@@ -48,11 +54,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Triển khai ứng dụng bằng Docker Compose...'
-                // Lấy mật khẩu DB từ Jenkins Credentials và truyền vào docker-compose
                 withCredentials([string(credentialsId: DB_PASSWORD_CREDENTIALS_ID, variable: 'DB_PASSWORD')]) {
-                    sh 'docker-compose down || true'
-                    // Biến DB_PASSWORD sẽ được docker-compose sử dụng
-                    sh 'docker-compose up -d'
+                    // Sử dụng `set` để thiết lập biến môi trường cho Docker Compose
+                    bat 'docker-compose down || true'
+                    bat 'docker-compose up -d'
                 }
             }
         }
@@ -61,7 +66,7 @@ pipeline {
     post {
         always {
             echo 'Quy trình hoàn tất.'
-            sh 'docker logout'
+            bat 'docker logout'
         }
     }
 }
