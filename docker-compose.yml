@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Service cho ứng dụng Spring Boot
+  art-gallery-app:
+    build: .
+    image: quangtb7/art-gallery-app # <-- Cập nhật username Docker Hub
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    depends_on:
+      - db
+    environment:
+      # Thay đổi cổng kết nối tới database thành 3306 (cổng nội bộ của container db)
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/art_gal_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
+      - SPRING_DATASOURCE_USERNAME=root
+      # Mật khẩu sẽ được truyền vào từ Jenkins
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+
+  # Service cho cơ sở dữ liệu MySQL
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: art_gal_db
+      MYSQL_USER: root
+      # Mật khẩu sẽ được truyền vào từ Jenkins
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      # Ánh xạ cổng 3306 nội bộ của container ra cổng 3307 bên ngoài
+      # Bạn có thể thay 3307 bằng bất kỳ cổng nào còn trống trên máy của bạn
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
