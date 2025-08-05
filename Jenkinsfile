@@ -50,7 +50,7 @@ pipeline {
             steps {
                 echo 'Triển khai ứng dụng bằng Docker Compose...'
                 withCredentials([string(credentialsId: DB_PASSWORD_CREDENTIALS_ID, variable: 'DB_PASSWORD')]) {
-                    // Thay thế "|| true" bằng một lệnh bat hợp lệ hơn để bỏ qua lỗi
+                    // Thay thế "|| true" bằng một lệnh bat hợp lệ hơn để bỏ qua lỗii
                     bat "docker-compose down || echo No containers to stop, continuing..."
                     bat "docker-compose up -d"
                 }
