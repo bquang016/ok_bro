@@ -6,7 +6,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Giai đoạn 2: Tạo image cuối cùng để chạy ứng dụng
+# Giai đoạn 2: Tạo image cuối cùng để chạy ứng dụngg
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
