@@ -6,7 +6,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
         DB_PASSWORD_CREDENTIALS_ID = 'mysql-root-password'
         APP_NAME = 'art-gallery-app'
-        // *** THAY ĐỔI QUAN TRỌNG: Thêm thư mục bin của Docker vào biến PATH ***
+        // *** THAY ĐỔI QUAN TRỌNG: Thêm thư mục bin của Docker vào biến PATH ****
         PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
     }
 
