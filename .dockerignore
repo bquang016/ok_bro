@@ -15,7 +15,7 @@ pom.xml.releaseBackup
 .classpath
 .project
 
-# Quan trọng: Bỏ qua thư mục chứa các file người dùng tải lên
+# Bỏ qua thư mục chứa các file người dùng tải lên
 src/main/resources/static/uploads/
 
 # Bỏ qua các file của Git
