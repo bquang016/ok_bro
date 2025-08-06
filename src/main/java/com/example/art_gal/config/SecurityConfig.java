@@ -39,9 +39,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // *** DÒNG QUAN TRỌNG ĐƯỢC THÊM VÀO ĐÂY ***
                         .requestMatchers("/actuator/**").permitAll()
-                        // ======================================
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(
